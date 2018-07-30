@@ -3,36 +3,29 @@ import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Lesson from "./Lesson";
+import moment from "moment";
 
 class DaySection extends Component {
   render() {
+    const { day, lessons } = this.props;
     return (
-      <div className="DaySection-container">
-        <Grid container spacing={24} style={styles.container}>
+      <div className="DaySection" style={styles.DaySection}>
+        <Grid container spacing={24}>
           <Typography variant="subheading" style={styles.dayHeader}>
-            {this.props.day}
+            {moment(day, "YYYY/MM/DD").format("ddd, MMMM Do YYYY")}
           </Typography>
-          {this.props.lessons.map(lesson => (
-            <Grid key={lesson.time} item xs={12} style={styles.lessonContainer}>
-              <Lesson key={lesson.time} lesson={lesson} />
-            </Grid>
-          ))}
+          {lessons.map(lesson => <Lesson key={lesson.time} lesson={lesson} />)}
         </Grid>
       </div>
     );
   }
 }
 const styles = {
-  container: { padding: 20 },
+  DaySection: { padding: 20 },
   dayHeader: {
     paddingBottom: 7,
-    fontWeight: 600
-  },
-  lessonContainer: {
-    paddingTop: 2,
-    paddingBottom: 0,
-    paddingRight: 0,
-    paddingLeft: 0
+    fontWeight: 600,
+    color: "#696969"
   }
 };
 DaySection.propTypes = {

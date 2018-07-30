@@ -4,7 +4,7 @@ const app = express();
 const path = require("path");
 const moment = require("moment");
 const _ = require("lodash");
-let lessons;
+let lessons = {};
 
 let rootPath = path.join(__dirname, "../");
 let indexPath = path.join(rootPath, "./client/public/index.html");
@@ -13,12 +13,29 @@ let indexPath = path.join(rootPath, "./client/public/index.html");
    fs.readFile which is async vs 'require'*/
 fs.readFile(path.join(rootPath, "./server/channel.json"), (err, data) => {
   if (err) throw err;
+  let unordered = {};
   let parsed = JSON.parse(data);
   let withDate = parsed.map(l => {
     l.date = moment(l.time).format("YYYY-MM-DD");
     return l;
   });
-  lessons = _.groupBy(withDate, "date");
+
+  // Group courses in the same day
+  let grouped = _.groupBy(withDate, "date");
+  // Sort courses in each day
+  Object.keys(grouped).map(day => {
+    return (unordered[day] = _.sortBy(grouped[day], "time"));
+  });
+  Object.keys(unordered)
+    .sort()
+    .forEach(key => {
+      lessons[key] = unordered[key];
+    });
+  /** These iterations can be expensive and would be
+   *  mitigated by querying the DB properly however,
+   *  for purpose of this demo we'll assume we
+   *  want to send the data ordered
+   */
 });
 
 app.get("/api/lessons", (req, res) => {
@@ -51,6 +68,13 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).send(err.message || "Internal server error.");
 });
 
+/* Currently there's a proxy set on the front end
+   that makes sure the express server is hit @ port 8000
+   rather than the default port React is listening to.
+   Please note that if your local env has a different port
+   set you will have to edit the client package.json */
 const port = process.env.PORT || 8000;
 
 app.listen(port, () => console.log(`Server started on port ${port}`));
+
+module.exports = app;
