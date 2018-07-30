@@ -27,12 +27,13 @@ describe("Lessons", () => {
         });
     });
 
-    it("It should have keys by YYYY-MM-DD date format", () => {
+    it("It should have keys by YYYY-MM-DD date format", done => {
       chai
         .request(server)
         .get("/api/lessons")
         .end((err, res) => {
           res.body.should.have.any.keys("2016-01-01");
+          done();
         });
     });
   });
